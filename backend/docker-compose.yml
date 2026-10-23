@@ -1,0 +1,12 @@
+# ローカル開発用の MySQL (RDS for MySQL 8.0 の代わり)
+# 初回起動時に db/ の SQL がファイル名順 (schema → seed) に実行される
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: localpass
+      TZ: UTC
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d:ro

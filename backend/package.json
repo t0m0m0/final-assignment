@@ -1,0 +1,24 @@
+{
+  "name": "sample-shop-backend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Sample Shop の API (API Gateway + Lambda + RDS for MySQL)",
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down -v",
+    "dev": "node --env-file=.env local/server.mjs",
+    "package": "sh scripts/package.sh",
+    "deploy": "sam build && sam deploy",
+    "deploy:guided": "sam build && sam deploy --guided"
+  },
+  "dependencies": {
+    "mysql2": "^3.11.0"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

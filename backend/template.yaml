@@ -1,0 +1,98 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Sample Shop API (API Gateway HTTP API + Lambda + RDS for MySQL)
+
+# RDS (と VPC) は作成済みのものを使う前提。
+# デプロイ: sam build && sam deploy --guided
+
+Parameters:
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: RDS がある VPC
+  SubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: Lambda を配置するプライベートサブネット (RDS に到達できること)
+  DbSecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+    Description: RDS インスタンスのセキュリティグループ (Lambda からの 3306 を許可するルールを追加します)
+  DbHost:
+    Type: String
+    Description: RDS のエンドポイント (xxx.yyy.ap-northeast-1.rds.amazonaws.com)
+  DbUser:
+    Type: String
+  DbPassword:
+    Type: String
+    NoEcho: true
+  DbName:
+    Type: String
+    Default: sample_shop
+  JwtSecret:
+    Type: String
+    NoEcho: true
+    MinLength: 32
+    Description: トークン署名用の秘密鍵 (openssl rand -hex 32 などで生成)
+  AllowedOrigin:
+    Type: String
+    Description: フロントエンドのオリジン (例 https://shop.example.com)。CORS で許可する
+
+Resources:
+  LambdaSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Sample Shop API Lambda
+      VpcId: !Ref VpcId
+
+  DbIngressFromLambda:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref DbSecurityGroupId
+      IpProtocol: tcp
+      FromPort: 3306
+      ToPort: 3306
+      SourceSecurityGroupId: !Ref LambdaSecurityGroup
+      Description: Sample Shop API Lambda
+
+  HttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      CorsConfiguration:
+        AllowOrigins:
+          - !Ref AllowedOrigin
+        AllowMethods: [GET, POST, PUT, PATCH, DELETE, OPTIONS]
+        AllowHeaders: [Content-Type, Authorization]
+        MaxAge: 600
+
+  ApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: src/index.handler
+      Runtime: nodejs22.x
+      Architectures: [arm64]
+      MemorySize: 512
+      Timeout: 10
+      VpcConfig:
+        SubnetIds: !Ref SubnetIds
+        SecurityGroupIds:
+          - !Ref LambdaSecurityGroup
+      Environment:
+        Variables:
+          DB_HOST: !Ref DbHost
+          DB_USER: !Ref DbUser
+          DB_PASSWORD: !Ref DbPassword
+          DB_NAME: !Ref DbName
+          JWT_SECRET: !Ref JwtSecret
+          # Node.js 20 以降のランタイムは RDS の CA 証明書を既定で読み込まないため明示する
+          NODE_EXTRA_CA_CERTS: /var/runtime/ca-cert.pem
+      Events:
+        Api:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/{proxy+}
+            Method: ANY
+
+Outputs:
+  ApiBaseUrl:
+    Description: frontend の VITE_API_BASE_URL に設定する値
+    Value: !Sub https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/api

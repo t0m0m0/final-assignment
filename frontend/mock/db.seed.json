@@ -1,0 +1,37 @@
+{
+  "users": [
+    { "id": 1, "name": "管理者 太郎", "email": "admin@example.com", "password": "admin123", "role": "admin" },
+    { "id": 2, "name": "山田 花子", "email": "user@example.com", "password": "user123", "role": "user" }
+  ],
+  "products": [
+    { "id": 1, "name": "ワイヤレスイヤホン", "description": "ノイズキャンセリング対応。最大24時間再生。", "price": 12800, "stock": 15, "category": "家電" },
+    { "id": 2, "name": "電気ケトル 1.0L", "description": "温度調節機能付き。コーヒーやお茶に最適。", "price": 6980, "stock": 4, "category": "家電" },
+    { "id": 3, "name": "はじめてのReact", "description": "コンポーネント設計から状態管理まで丁寧に解説。", "price": 3080, "stock": 30, "category": "書籍" },
+    { "id": 4, "name": "TypeScript実践ガイド", "description": "型安全なアプリケーション開発のための一冊。", "price": 3520, "stock": 2, "category": "書籍" },
+    { "id": 5, "name": "スペシャルティコーヒー豆 200g", "description": "エチオピア産。華やかな香りと酸味。", "price": 1680, "stock": 50, "category": "食品" },
+    { "id": 6, "name": "ステンレスマグカップ", "description": "真空断熱で温かさが長持ち。", "price": 2200, "stock": 0, "category": "雑貨" }
+  ],
+  "orders": [
+    {
+      "id": 1,
+      "userId": 2,
+      "userName": "山田 花子",
+      "items": [{ "productId": 3, "name": "はじめてのReact", "price": 3080, "quantity": 1 }],
+      "total": 3080,
+      "status": "delivered",
+      "createdAt": "2026-10-01T10:15:00.000Z"
+    },
+    {
+      "id": 2,
+      "userId": 2,
+      "userName": "山田 花子",
+      "items": [
+        { "productId": 5, "name": "スペシャルティコーヒー豆 200g", "price": 1680, "quantity": 2 },
+        { "productId": 6, "name": "ステンレスマグカップ", "price": 2200, "quantity": 1 }
+      ],
+      "total": 5560,
+      "status": "pending",
+      "createdAt": "2026-10-20T08:30:00.000Z"
+    }
+  ]
+}
