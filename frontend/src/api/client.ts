@@ -10,10 +10,13 @@ export class ApiError extends Error {
   }
 }
 
-let authToken: string | null = null
+type AuthTokenProvider = () => Promise<string | undefined>
 
-export function setAuthToken(token: string | null) {
-  authToken = token
+// トークンは期限切れで更新されるため、値ではなく取得する関数を受け取り、リクエストのたびに呼ぶ
+let getAuthToken: AuthTokenProvider = async () => undefined
+
+export function setAuthTokenProvider(provider: AuthTokenProvider) {
+  getAuthToken = provider
 }
 
 type Query = Record<string, string | number | undefined>
@@ -40,7 +43,8 @@ export async function request<T>(
 ): Promise<T> {
   const headers: Record<string, string> = {}
   if (body !== undefined) headers['Content-Type'] = 'application/json'
-  if (authToken) headers.Authorization = `Bearer ${authToken}`
+  const token = await getAuthToken()
+  if (token) headers.Authorization = `Bearer ${token}`
 
   const res = await fetch(buildUrl(path, query), {
     method,

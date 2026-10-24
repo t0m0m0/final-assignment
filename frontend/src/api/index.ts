@@ -1,11 +1,10 @@
 import type { Order, OrderStatus, Product, ProductInput, User } from '../types'
 import { request } from './client'
 
-export { ApiError, setAuthToken } from './client'
+export { ApiError, setAuthTokenProvider } from './client'
 
+// ログイン自体は Cognito で行う (src/auth/cognito.ts)。API からはロールを含むユーザー情報を取得する
 export const authApi = {
-  login: (email: string, password: string) =>
-    request<{ token: string; user: User }>('/login', { method: 'POST', body: { email, password } }),
   me: (signal?: AbortSignal) => request<User>('/me', { signal }),
 }
 

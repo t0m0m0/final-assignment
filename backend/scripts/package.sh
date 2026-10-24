@@ -1,6 +1,6 @@
 #!/bin/sh
 # Lambda にアップロードする zip (dist/function.zip) を作る。
-# SAM を使わず、マネジメントコンソールや aws lambda update-function-code でデプロイする場合に使う。
+# マネジメントコンソールの「アップロード元 → .zip ファイル」や aws lambda update-function-code で使う。
 set -eu
 cd "$(dirname "$0")/.."
 

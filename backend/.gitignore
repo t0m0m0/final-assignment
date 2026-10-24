@@ -1,6 +1,3 @@
 node_modules/
-.aws-sam/
 .env
 dist/
-# sam deploy --guided の入力値 (DB パスワード等を含みうる)
-samconfig.toml

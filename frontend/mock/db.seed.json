@@ -1,7 +1,7 @@
 {
   "users": [
-    { "id": 1, "name": "管理者 太郎", "email": "admin@example.com", "password": "admin123", "role": "admin" },
-    { "id": 2, "name": "山田 花子", "email": "user@example.com", "password": "user123", "role": "user" }
+    { "id": 1, "name": "管理者 太郎", "email": "admin@example.com" },
+    { "id": 2, "name": "山田 花子", "email": "user@example.com" }
   ],
   "products": [
     { "id": 1, "name": "ワイヤレスイヤホン", "description": "ノイズキャンセリング対応。最大24時間再生。", "price": 12800, "stock": 15, "category": "家電" },

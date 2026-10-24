@@ -7,12 +7,14 @@ SET NAMES utf8mb4;
 CREATE DATABASE IF NOT EXISTS sample_shop CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 USE sample_shop;
 
+-- 認証情報とロールは Amazon Cognito が持つ (ロールは Cognito グループ "admin" で判定)。
+-- ここには注文から参照するためのプロフィールだけを保存し、初回ログイン時に自動で作成・紐付けする
 CREATE TABLE users (
-  id            INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  name          VARCHAR(100) NOT NULL,
-  email         VARCHAR(255) NOT NULL UNIQUE,
-  password_hash VARCHAR(255) NOT NULL, -- "<salt hex>:<scrypt hash hex>"
-  role          ENUM('user', 'admin') NOT NULL DEFAULT 'user'
+  id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  cognito_sub CHAR(36) NULL UNIQUE, -- Cognito ユーザーの sub。事前登録されてまだログインしていないユーザーは NULL
+  name        VARCHAR(100) NOT NULL,
+  email       VARCHAR(255) NOT NULL,
+  INDEX idx_users_email (email)
 );
 
 CREATE TABLE products (

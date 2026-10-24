@@ -2,12 +2,11 @@
 // API Gateway (HTTP API) の `ANY /api/{proxy+}` をこの 1 関数で受け、パスで振り分ける。
 import { getCurrentUser } from './auth.mjs'
 import { HttpError, errorResponse } from './http.mjs'
-import { login, me } from './routes/auth.mjs'
+import { me } from './routes/auth.mjs'
 import { createOrder, listOrders, updateOrderStatus } from './routes/orders.mjs'
 import { createProduct, deleteProduct, getProduct, listProducts, updateProduct } from './routes/products.mjs'
 
 const routes = [
-  ['POST', '/login', login],
   ['GET', '/me', me],
   ['GET', '/products', listProducts],
   ['POST', '/products', createProduct],

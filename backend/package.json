@@ -11,14 +11,15 @@
     "db:up": "docker compose up -d",
     "db:down": "docker compose down -v",
     "dev": "node --env-file=.env local/server.mjs",
-    "package": "sh scripts/package.sh",
-    "deploy": "sam build && sam deploy",
-    "deploy:guided": "sam build && sam deploy --guided"
+    "package": "sh scripts/package.sh"
   },
   "dependencies": {
     "mysql2": "^3.11.0"
   },
   "engines": {
     "node": ">=22"
+  },
+  "devDependencies": {
+    "aws-jwt-verify": "^5.2.1"
   }
 }

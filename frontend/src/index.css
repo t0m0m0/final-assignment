@@ -393,19 +393,6 @@ textarea {
   gap: 1rem;
 }
 
-.demo-accounts {
-  font-size: 0.8rem;
-}
-
-.demo-accounts p,
-.demo-accounts ul {
-  margin: 0;
-}
-
-.demo-accounts ul {
-  padding-left: 1.25rem;
-}
-
 /* ---------- admin layout ---------- */
 .admin-shell {
   display: grid;

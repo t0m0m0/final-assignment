@@ -18,23 +18,30 @@ const db = router.db
 server.use(jsonServer.defaults({ logger: true }))
 server.use(jsonServer.bodyParser)
 
-const toPublicUser = ({ password: _password, ...user }) => user
-
-// モックなのでトークンは "mock-token-<userId>" という単純な形式
+/**
+ * Cognito の ID トークンからユーザーを特定する。初めてのユーザーは users に追加する。
+ * 開発用のモックなので署名は検証せず、中身 (email / name / cognito:groups) を読むだけ。
+ * 本番では API Gateway の JWT オーソライザーが検証する (backend/README.md)。
+ */
 function findUserByToken(authorization = '') {
-  const match = /^Bearer mock-token-(\d+)$/.exec(authorization)
+  const match = /^Bearer [\w-]+\.([\w-]+)\.[\w-]+$/.exec(authorization)
   if (!match) return null
-  return db.get('users').find({ id: Number(match[1]) }).value() ?? null
-}
-
-server.post('/api/login', (req, res) => {
-  const { email, password } = req.body ?? {}
-  const user = db.get('users').find({ email, password }).value()
-  if (!user) {
-    return res.status(401).json({ message: 'メールアドレスまたはパスワードが違います' })
+  let claims
+  try {
+    claims = JSON.parse(Buffer.from(match[1], 'base64url').toString('utf8'))
+  } catch {
+    return null
   }
-  res.json({ token: `mock-token-${user.id}`, user: toPublicUser(user) })
-})
+  if (claims.token_use !== 'id' || !claims.email || claims.exp < Date.now() / 1000) return null
+
+  const users = db.get('users')
+  const user =
+    users.find({ email: claims.email }).value() ??
+    users.insert({ name: claims.name ?? claims.email, email: claims.email }).write()
+  // ロールは Cognito のグループで決める
+  const role = (claims['cognito:groups'] ?? []).includes('admin') ? 'admin' : 'user'
+  return { id: user.id, name: user.name, email: user.email, role }
+}
 
 // 以降のエンドポイントで認証・認可を行う
 server.use('/api', (req, res, next) => {
@@ -44,9 +51,9 @@ server.use('/api', (req, res, next) => {
   if (req.path.startsWith('/products') && req.method === 'GET') return next()
   if (!user) return res.status(401).json({ message: 'ログインが必要です' })
 
-  if (req.path === '/me') return res.json(toPublicUser(user))
+  if (req.path === '/me') return res.json(user)
 
-  // パスワードを含むため users は直接公開しない
+  // 個人情報を含むため users は直接公開しない
   if (req.path.startsWith('/users')) return res.status(404).end()
 
   if (req.path.startsWith('/products')) {
